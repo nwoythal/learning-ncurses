@@ -4,11 +4,11 @@
 #include <unistd.h>
 #include <string.h>
 
-#ifdef _WIN32
-    #include <windows.h>
+#ifdef _WIN32 //Portability
+    #include <windows.h> 
     void sleep(long time)
     {
-        Sleep(time*1000); //windows uses ms to sleep, and defines the function with 'S'
+        Sleep(time*1000); //windows uses ms to sleep
     }
 #elif __linux__
     #include <sys/ioctl.h>
@@ -18,7 +18,7 @@
 
 enum {SP_Tree, SP_You, SP_Cave};
 
-void wait()
+void wait() //Do nothing, will be refined in the future.
 {
 }
 
@@ -86,11 +86,11 @@ int main(int argc, char* argv[])
                 break;
             case KEY_LEFT:
                 if((x_loc-1)>=0)
-                    x_loc--;
+                    x_loc-=2;
                 break;
             case KEY_RIGHT:
                 if((x_loc+1)<size.ws_col)
-                    x_loc++;
+                    x_loc+=2;
                 break;
             case 'c':
                 if(mode=='e')
