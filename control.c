@@ -63,6 +63,15 @@ void render_terrain(int *list)
     }
 }
 
+//Render player info
+void render_stats(struct winsize size)
+{
+    for(int i=0; i<size.ws_row; i++)
+    {
+        mvaddch(i, size.ws_col+1, '|');
+    }
+}
+
 int main(int argc, char* argv[])
 {
     //variable declarations
@@ -71,9 +80,6 @@ int main(int argc, char* argv[])
     curs_set(0);
     struct winsize size;
     ioctl(0, TIOCGWINSZ, &size);
-    size.ws_col=size.ws_col*2/3; //Reserve 1/3 of the window for other garbage
-    int x_loc=size.ws_col/2; //start x
-    int y_loc=size.ws_row/2; //start y
     int tree_list[OBJ_COUNT]; //Tree linked list, even numbers are x-coord, odds are y-coord
     keypad(stdscr, TRUE);
     unsigned short input='\0'; //Store in int because KEY_values are large, apparently.
@@ -92,7 +98,10 @@ int main(int argc, char* argv[])
     else
     {
         generate_terrain(tree_list, size);
+        size.ws_col=size.ws_col*2/3; //Reserve 1/3 of the window for other garbage
     }
+    int x_loc=size.ws_col/2; //start x
+    int y_loc=size.ws_row/2; //start y
     
     draw(x_loc, y_loc, SP_You);
     //Movement loop, exits on ESC press.
@@ -130,6 +139,7 @@ int main(int argc, char* argv[])
         {
             clear();
             render_terrain(tree_list);
+            render_stats(size);
         }
         else
         {
