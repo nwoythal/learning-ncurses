@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define OBJ_COUNT 256
+
 #ifdef _WIN32 //Portability
     #include <windows.h> 
     void sleep(long time)
@@ -31,7 +33,7 @@ void draw(int x, int y, int type)
             mvaddch(y, x, 'i');
             break;
         case SP_Tree:
-            mvaddch(y, x, '9');
+            mvaddch(y, x, 'P');
             break;
         case SP_Cave:
             mvaddch(y, x, '@');
@@ -39,6 +41,23 @@ void draw(int x, int y, int type)
         default:
             wait();
             break;
+    }
+}
+
+void generate_terrain(int *list, struct winsize mods)
+{
+    for(int i=0; i<OBJ_COUNT; i+=2)
+    {
+        *(list+i)=rand()%mods.ws_col;
+        *(list+i+1)=rand()%mods.ws_row;
+    }
+}
+
+void render_terrain(int *list)
+{
+    for(int i=0; i<OBJ_COUNT; i+=2)
+    {
+        draw(*(list+i), *(list+i+1), SP_Tree);
     }
 }
 
@@ -52,7 +71,7 @@ int main(int argc, char* argv[])
     ioctl(0, TIOCGWINSZ, &size);
     int x_loc=size.ws_col/2; //start x
     int y_loc=size.ws_row/2; //start y
-    int tree_list[255]; //Tree linked list, even numbers are x-coord, odds are y-coord
+    int tree_list[OBJ_COUNT]; //Tree linked list, even numbers are x-coord, odds are y-coord
     keypad(stdscr, TRUE);
     unsigned short input='\0'; //Store in int because KEY_values are large, apparently.
     char mode='\0'; //only supports 'e' for now.
@@ -67,10 +86,11 @@ int main(int argc, char* argv[])
         clear();
         mode='e';
     }
+    else
+    {
+        generate_terrain(tree_list, size);
+    }
     
-/*    tree_list[0]=rand()%size.ws_col;
-    tree_list[1]=rand()%size.ws_row;
-    draw(tree_list[0], tree_list[1], SP_Tree);*/
     draw(x_loc, y_loc, SP_You);
     //Movement loop, exits on ESC press.
     while(input!=27)
@@ -108,6 +128,7 @@ int main(int argc, char* argv[])
         else
             refresh();
         draw(x_loc, y_loc, SP_You);
+        render_terrain(tree_list);
         //draw(tree_list[0], tree_list[1], SP_Tree);
     }
     endwin();
