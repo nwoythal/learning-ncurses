@@ -21,7 +21,7 @@
 
 enum {SP_Tree, SP_You, SP_Cave};
 
-void wait() //Do nothing, will be refined in the future.
+void wait() //Do nothing. Needs fixing.
 {
 }
 
@@ -44,6 +44,7 @@ void draw(int x, int y, int type)
     }
 }
 
+//Create trees randomly on terrain. Needs fixing.
 void generate_terrain(int *list, struct winsize mods)
 {
     for(int i=0; i<OBJ_COUNT; i+=2)
@@ -53,6 +54,7 @@ void generate_terrain(int *list, struct winsize mods)
     }
 }
 
+//Draw every tree
 void render_terrain(int *list)
 {
     for(int i=0; i<OBJ_COUNT; i+=2)
@@ -69,6 +71,7 @@ int main(int argc, char* argv[])
     curs_set(0);
     struct winsize size;
     ioctl(0, TIOCGWINSZ, &size);
+    size.ws_col=size.ws_col*2/3; //Reserve 1/3 of the window for other garbage
     int x_loc=size.ws_col/2; //start x
     int y_loc=size.ws_row/2; //start y
     int tree_list[OBJ_COUNT]; //Tree linked list, even numbers are x-coord, odds are y-coord
@@ -109,11 +112,11 @@ int main(int argc, char* argv[])
                 break;
             case KEY_LEFT:
                 if((x_loc-1)>=0)
-                    x_loc-=2;
+                    x_loc--;
                 break;
             case KEY_RIGHT:
                 if((x_loc+1)<size.ws_col)
-                    x_loc+=2;
+                    x_loc++;
                 break;
             case 'c':
                 if(mode=='e')
@@ -124,11 +127,15 @@ int main(int argc, char* argv[])
                 break;
         }
         if(mode!='e')
+        {
             clear();
+            render_terrain(tree_list);
+        }
         else
+        {
             refresh();
+        }
         draw(x_loc, y_loc, SP_You);
-        render_terrain(tree_list);
         //draw(tree_list[0], tree_list[1], SP_Tree);
     }
     endwin();
