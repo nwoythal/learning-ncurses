@@ -66,6 +66,7 @@ void render_terrain(int *list)
 //Render player info
 void render_stats(struct winsize size)
 {
+    //divide window
     for(int i=0; i<size.ws_row; i++)
     {
         mvaddch(i, size.ws_col+1, '|');
@@ -97,8 +98,8 @@ int main(int argc, char* argv[])
     }
     else
     {
+        size.ws_col=size.ws_col*2/3; //Reserve 1/3 of the window for stats 
         generate_terrain(tree_list, size);
-        size.ws_col=size.ws_col*2/3; //Reserve 1/3 of the window for other garbage
     }
     int x_loc=size.ws_col/2; //start x
     int y_loc=size.ws_row/2; //start y
