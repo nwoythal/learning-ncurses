@@ -85,12 +85,14 @@ int main(int argc, char* argv[])
     keypad(stdscr, TRUE);
     unsigned short input='\0'; //Store in int because KEY_values are large, apparently.
     char mode='\0'; //only supports 'e' for now.
+    int cave_x;
+    int cave_y;
 
     //Check if etch a sketch argument was passed.
     if(argc>1 && argv[1][1]=='e')
     {
         curs_set(2);
-        printw("Starting in etch-a-sketch mode.");
+        printw("Starting in etch-a-sketch mode...");
         refresh();
         sleep(2);
         clear();
@@ -100,6 +102,8 @@ int main(int argc, char* argv[])
     {
         size.ws_col=size.ws_col*2/3; //Reserve 1/3 of the window for stats 
         generate_terrain(tree_list, size);
+        cave_x=rand()%size.ws_col;
+        cave_y=rand()%size.ws_row;
     }
     int x_loc=size.ws_col/2; //start x
     int y_loc=size.ws_row/2; //start y
@@ -139,7 +143,18 @@ int main(int argc, char* argv[])
         if(mode!='e')
         {
             clear();
-            render_terrain(tree_list);
+            //Check for collisions
+            if(y_loc==cave_y && x_loc==cave_x)
+            {
+                x_loc=size.ws_col/2; //reset x
+                y_loc=size.ws_row/2; //reset y
+                memset(tree_list, 0, OBJ_COUNT);
+            }
+            else
+            {
+                render_terrain(tree_list);
+                draw(cave_x, cave_y, SP_Cave);
+            }
             render_stats(size);
         }
         else
@@ -147,7 +162,6 @@ int main(int argc, char* argv[])
             refresh();
         }
         draw(x_loc, y_loc, SP_You);
-        //draw(tree_list[0], tree_list[1], SP_Tree);
     }
     endwin();
     return 0;
