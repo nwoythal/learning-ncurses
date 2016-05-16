@@ -78,12 +78,21 @@ void generate_terrain(int *list, struct winsize mods)
 }
 
 //Draw every tree
-void render_terrain(int *list)
+void render_terrain(int *list, int pallet)
 {
+    //Pallet definitions
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(4, COLOR_RED, COLOR_BLACK);
+    pallet = (pallet==3) ? 2 : pallet;
+    pallet = (pallet==5) ? 4 : pallet;
+
+    attron(COLOR_PAIR(pallet));
     for(int i=0; i<OBJ_COUNT; i+=2)
     {
         draw(*(list+i), *(list+i+1), SP_Tree);
     }
+    attroff(COLOR_PAIR(pallet));
 }
 
 //Render player info
@@ -105,6 +114,13 @@ int main(int argc, char* argv[])
 {
     //variable declarations
     initscr();
+    if(!has_colors())
+    {
+        printf("Your terminal does not support colors. Exiting...\n");
+        endwin();
+        exit(1);
+    }
+    start_color();
     raw();
     curs_set(0);
     struct winsize size;
@@ -115,6 +131,7 @@ int main(int argc, char* argv[])
     char mode='\0'; //only supports 'e' for now.
     int cave_x;
     int cave_y;
+    int level=1;
 
     //Check if etch a sketch argument was passed.
     if(argc>1 && argv[1][1]=='e')
@@ -179,13 +196,15 @@ int main(int argc, char* argv[])
             {
                 x_loc=size.ws_col/2; //reset x
                 y_loc=size.ws_row/2; //reset y
+                level++; //Increment level to change pallet
                 cave_x=randi(size.ws_col);
                 cave_y=randi(size.ws_row);
-                memset(tree_list, 0, OBJ_COUNT*sizeof(int)); //Zero all tree locations
+                generate_terrain(tree_list, size);
+                //memset(tree_list, 0, OBJ_COUNT*sizeof(int)); //Remove terrain
             }
             else
             {
-                render_terrain(tree_list);
+                render_terrain(tree_list, level);
                 draw(cave_x, cave_y, SP_Cave);
             }
             render_stats(size);
