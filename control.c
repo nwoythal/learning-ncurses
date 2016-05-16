@@ -20,6 +20,15 @@
 #endif
 
 enum {SP_Tree, SP_You, SP_Cave};
+struct character
+{
+    int hp_max;
+    int hp_now;
+    int mp_max;
+    int mp_now;
+    int damage;
+    int armor;
+}player={30, 30, 15, 15, 3, 0};
 
 void wait() //Do nothing. Needs fixing.
 {
@@ -71,6 +80,11 @@ void render_stats(struct winsize size)
     {
         mvaddch(i, size.ws_col+1, '|');
     }
+    mvprintw(1, size.ws_col+3, "Player");
+    mvprintw(2, size.ws_col+3, "HP:  %d/%d", player.hp_now, player.hp_max);
+    mvprintw(3, size.ws_col+3, "MP:  %d/%d", player.mp_now, player.mp_max);
+    mvprintw(4, size.ws_col+3, "ATK: %d",player.damage);
+    mvprintw(5, size.ws_col+3, "DEF: %d",player.armor);
 }
 
 int main(int argc, char* argv[])
@@ -109,6 +123,7 @@ int main(int argc, char* argv[])
     int y_loc=size.ws_row/2; //start y
     
     draw(x_loc, y_loc, SP_You);
+    render_stats(size);
     //Movement loop, exits on ESC press.
     while(input!=27)
     {
