@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define OBJ_COUNT 256
 
@@ -53,13 +54,26 @@ void draw(int x, int y, int type)
     }
 }
 
+
+//Redefine random int function, because terrain generation was finnicky
+int randi(int ceiling)
+{
+    int divisor=RAND_MAX/(ceiling+1);
+    int rand_int;
+    do
+    {
+        rand_int=rand()/divisor;
+    }while(rand_int>ceiling);
+    return rand_int;
+}
+
 //Create trees randomly on terrain. Needs fixing.
 void generate_terrain(int *list, struct winsize mods)
 {
     for(int i=0; i<OBJ_COUNT; i+=2)
     {
-        *(list+i)=rand()%mods.ws_col;
-        *(list+i+1)=rand()%mods.ws_row;
+        *(list+i)=randi(mods.ws_col);
+        *(list+i+1)=randi(mods.ws_row);
     }
 }
 
@@ -115,9 +129,11 @@ int main(int argc, char* argv[])
     else
     {
         size.ws_col=size.ws_col*2/3; //Reserve 1/3 of the window for stats 
+        time_t t;
+        srand((unsigned) time(&t)); //Set seed so terrain is less consistent
         generate_terrain(tree_list, size);
-        cave_x=rand()%size.ws_col;
-        cave_y=rand()%size.ws_row;
+        cave_x=randi(size.ws_col);
+        cave_y=randi(size.ws_row);
     }
     int x_loc=size.ws_col/2; //start x
     int y_loc=size.ws_row/2; //start y
@@ -163,8 +179,8 @@ int main(int argc, char* argv[])
             {
                 x_loc=size.ws_col/2; //reset x
                 y_loc=size.ws_row/2; //reset y
-                cave_x=rand()%size.ws_col;
-                cave_y=rand()%size.ws_row;
+                cave_x=randi(size.ws_col);
+                cave_y=randi(size.ws_row);
                 memset(tree_list, 0, OBJ_COUNT*sizeof(int)); //Zero all tree locations
             }
             else
