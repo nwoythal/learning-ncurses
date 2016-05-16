@@ -148,7 +148,9 @@ int main(int argc, char* argv[])
             {
                 x_loc=size.ws_col/2; //reset x
                 y_loc=size.ws_row/2; //reset y
-                memset(tree_list, 0, OBJ_COUNT);
+                cave_x=rand()%size.ws_col;
+                cave_y=rand()%size.ws_row;
+                memset(tree_list, 0, OBJ_COUNT*sizeof(int)); //Zero all tree locations
             }
             else
             {
