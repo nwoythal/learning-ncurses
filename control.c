@@ -29,7 +29,9 @@ struct character
     int mp_now;
     int damage;
     int armor;
-}player={30, 30, 15, 15, 3, 0};
+    int x_loc;
+    int y_loc;
+}player={30, 30, 15, 15, 3, 0, 0, 0};
 
 void wait() //Do nothing. Needs fixing.
 {
@@ -151,11 +153,12 @@ int main(int argc, char* argv[])
         generate_terrain(tree_list, size);
         cave_x=randi(size.ws_col);
         cave_y=randi(size.ws_row);
+        
     }
-    int x_loc=size.ws_col/2; //start x
-    int y_loc=size.ws_row/2; //start y
+    player.x_loc=size.ws_col/2; //start x
+    player.y_loc=size.ws_row/2; //start y
     
-    draw(x_loc, y_loc, SP_You);
+    draw(player.x_loc, player.y_loc, SP_You);
     render_stats(size);
     //Movement loop, exits on ESC press.
     while(input!=27)
@@ -165,20 +168,20 @@ int main(int argc, char* argv[])
         switch(input)
         {
             case KEY_UP:
-                if((y_loc-1)>=0)
-                    y_loc--;
+                if((player.y_loc-1)>=0)
+                    player.y_loc--;
                 break;
             case KEY_DOWN:
-                if((y_loc+1)<size.ws_row)
-                    y_loc++;
+                if((player.y_loc+1)<size.ws_row)
+                    player.y_loc++;
                 break;
             case KEY_LEFT:
-                if((x_loc-1)>=0)
-                    x_loc--;
+                if((player.x_loc-1)>=0)
+                    player.x_loc--;
                 break;
             case KEY_RIGHT:
-                if((x_loc+1)<size.ws_col)
-                    x_loc++;
+                if((player.x_loc+1)<size.ws_col)
+                    player.x_loc++;
                 break;
             case 'c':
                 if(mode=='e')
@@ -192,10 +195,10 @@ int main(int argc, char* argv[])
         {
             clear();
             //Check for collisions
-            if(y_loc==cave_y && x_loc==cave_x)
+            if(player.y_loc==cave_y && player.x_loc==cave_x)
             {
-                x_loc=size.ws_col/2; //reset x
-                y_loc=size.ws_row/2; //reset y
+                player.x_loc=size.ws_col/2; //reset x
+                player.y_loc=size.ws_row/2; //reset y
                 level++; //Increment level to change pallet
                 cave_x=randi(size.ws_col);
                 cave_y=randi(size.ws_row);
@@ -213,7 +216,7 @@ int main(int argc, char* argv[])
         {
             refresh();
         }
-        draw(x_loc, y_loc, SP_You);
+        draw(player.x_loc, player.y_loc, SP_You);
     }
     endwin();
     return 0;
