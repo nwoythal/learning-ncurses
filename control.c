@@ -208,7 +208,8 @@ int main(int argc, char* argv[])
             else
             {
                 render_terrain(tree_list, level);
-                draw(cave_x, cave_y, SP_Cave);
+                if(level<=5)
+                    draw(cave_x, cave_y, SP_Cave);
             }
             render_stats(size);
         }
