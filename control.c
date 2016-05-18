@@ -20,7 +20,7 @@
     #error "Unrecognized compiler"
 #endif
 
-enum {SP_Tree, SP_You, SP_Cave};
+enum {SP_Tree, SP_You, SP_Cave, SP_Stalag, SP_Pit};
 struct character
 {
     int hp_max;
@@ -49,6 +49,12 @@ void draw(int x, int y, int type)
             break;
         case SP_Cave:
             mvaddch(y, x, '@');
+            break;
+        case SP_Stalag:
+            mvaddch(y, x, '^');
+            break;
+        case SP_Pit:
+            mvaddch(y, x, '#');
             break;
         default:
             wait();
@@ -88,11 +94,19 @@ void render_terrain(int *list, int pallet)
     init_pair(4, COLOR_RED, COLOR_BLACK);
     pallet = (pallet==3) ? 2 : pallet;
     pallet = (pallet==5) ? 4 : pallet;
-
+    int sprite=SP_Tree;
+    if(pallet > 1 && pallet < 4)
+    {
+        sprite=SP_Stalag;
+    }
+    else if(pallet > 3 && pallet < 6)
+    {
+        sprite=SP_Pit;
+    } 
     attron(COLOR_PAIR(pallet));
     for(int i=0; i<OBJ_COUNT; i+=2)
     {
-        draw(*(list+i), *(list+i+1), SP_Tree);
+        draw(*(list+i), *(list+i+1), sprite);
     }
     attroff(COLOR_PAIR(pallet));
 }
