@@ -20,7 +20,7 @@
     #error "Unrecognized compiler"
 #endif
 
-enum {SP_Tree, SP_You, SP_Cave, SP_Stalag, SP_Pit};
+enum {SP_Tree, SP_You, SP_Cave, SP_Stalag, SP_Pit, SP_Mob};
 struct character
 {
     int hp_max;
@@ -32,9 +32,21 @@ struct character
     int x_loc;
     int y_loc;
 }player={30, 30, 15, 15, 3, 0, 0, 0};
+int level=1;
 
-void wait() //Do nothing. Needs fixing.
+void wait() //Do nothing. Needs fixing for combat.
 {
+}
+
+void combat(struct character* attacker, struct character* defender)
+{
+    attacker->hp_now-=defender->damage;
+    defender->hp_now-=attacker->damage;
+    if(defender->hp_now<=0)
+    {
+        defender->x_loc=-1;
+        defender->y_loc=-1;
+    }
 }
 
 void draw(int x, int y, int type)
@@ -55,6 +67,9 @@ void draw(int x, int y, int type)
             break;
         case SP_Pit:
             mvaddch(y, x, '#');
+            break;
+        case SP_Mob:
+            mvaddch(y, x, '&');
             break;
         default:
             wait();
@@ -122,8 +137,9 @@ void render_stats(struct winsize size)
     mvprintw(1, size.ws_col+3, "Player");
     mvprintw(2, size.ws_col+3, "HP:  %d/%d", player.hp_now, player.hp_max);
     mvprintw(3, size.ws_col+3, "MP:  %d/%d", player.mp_now, player.mp_max);
-    mvprintw(4, size.ws_col+3, "ATK: %d",player.damage);
-    mvprintw(5, size.ws_col+3, "DEF: %d",player.armor);
+    mvprintw(4, size.ws_col+3, "ATK: %d", player.damage);
+    mvprintw(5, size.ws_col+3, "DEF: %d", player.armor);
+    mvprintw(0, size.ws_col+11, "Floor %d", level);
 }
 
 int main(int argc, char* argv[])
@@ -147,7 +163,6 @@ int main(int argc, char* argv[])
     char mode='\0'; //only supports 'e' for now.
     int cave_x;
     int cave_y;
-    int level=1;
 
     //Check if etch a sketch argument was passed.
     if(argc>1 && argv[1][1]=='e')
@@ -171,8 +186,10 @@ int main(int argc, char* argv[])
     }
     player.x_loc=size.ws_col/2; //start x
     player.y_loc=size.ws_row/2; //start y
+    struct character monster={10, 10, 0, 0, 1, 0, randi(size.ws_col), randi(size.ws_row)};
     
     draw(player.x_loc, player.y_loc, SP_You);
+    draw(monster.x_loc, monster.y_loc, SP_Mob);
     render_stats(size);
     //Movement loop, exits on ESC press.
     while(input!=27)
@@ -183,19 +200,39 @@ int main(int argc, char* argv[])
         {
             case KEY_UP:
                 if((player.y_loc-1)>=0)
-                    player.y_loc--;
+                {
+                    if(player.y_loc-1==monster.y_loc && player.x_loc==monster.x_loc)
+                        combat(&player, &monster);
+                    else
+                        player.y_loc--;
+                }
                 break;
             case KEY_DOWN:
                 if((player.y_loc+1)<size.ws_row)
-                    player.y_loc++;
+                {
+                    if(player.y_loc+1==monster.y_loc && player.x_loc==monster.x_loc)
+                        combat(&player, &monster);
+                    else
+                        player.y_loc++;
+                }
                 break;
             case KEY_LEFT:
                 if((player.x_loc-1)>=0)
-                    player.x_loc--;
+                {
+                    if(player.x_loc-1==monster.x_loc && player.y_loc==monster.y_loc)
+                        combat(&player, &monster);
+                    else
+                        player.x_loc--;
+                }
                 break;
             case KEY_RIGHT:
                 if((player.x_loc+1)<size.ws_col)
-                    player.x_loc++;
+                {
+                    if(player.x_loc+1==monster.x_loc && player.y_loc==monster.y_loc)
+                        combat(&player, &monster);
+                    else
+                        player.x_loc++;
+                }
                 break;
             case 'c':
                 if(mode=='e')
@@ -204,6 +241,14 @@ int main(int argc, char* argv[])
             default:
                 wait();
                 break;
+        }
+        if(player.hp_now<=0)
+        {
+            clear();
+            mvprintw(size.ws_row/2, (size.ws_col/2)-4, "GAME OVER.");
+            input=getch();
+            endwin();
+            exit(0);
         }
         if(mode!='e')
         {
@@ -217,13 +262,14 @@ int main(int argc, char* argv[])
                 cave_x=randi(size.ws_col);
                 cave_y=randi(size.ws_row);
                 generate_terrain(tree_list, size);
-                //memset(tree_list, 0, OBJ_COUNT*sizeof(int)); //Remove terrain
             }
             else
             {
                 render_terrain(tree_list, level);
                 if(level<=5)
                     draw(cave_x, cave_y, SP_Cave);
+                if(monster.hp_now>0)
+                    draw(monster.x_loc, monster.y_loc, SP_Mob);
             }
             render_stats(size);
         }
