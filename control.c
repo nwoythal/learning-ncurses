@@ -132,7 +132,7 @@ void render_stats(struct winsize size)
     //divide window
     for(int i=0; i<size.ws_row; i++)
     {
-        mvaddch(i, size.ws_col+1, '|');
+        mvaddch(i, size.ws_col, '|');
     }
     mvprintw(1, size.ws_col+3, "Player");
     mvprintw(2, size.ws_col+3, "HP:  %d/%d", player.hp_now, player.hp_max);
@@ -140,6 +140,15 @@ void render_stats(struct winsize size)
     mvprintw(4, size.ws_col+3, "ATK: %d", player.damage);
     mvprintw(5, size.ws_col+3, "DEF: %d", player.armor);
     mvprintw(0, size.ws_col+11, "Floor %d", level);
+}
+
+
+/*
+Is the optimal algorithm for this A*, since values are going to be updating every turn?
+*/
+void get_path()
+{
+
 }
 
 int main(int argc, char* argv[])
@@ -245,7 +254,14 @@ int main(int argc, char* argv[])
         if(player.hp_now<=0)
         {
             clear();
+            player.hp_max=0;
+            player.hp_now=0;
+            player.mp_max=0;
+            player.mp_now=0;
+            player.damage=0;
+            player.armor =0;
             mvprintw(size.ws_row/2, (size.ws_col/2)-4, "GAME OVER.");
+            render_stats(size);
             input=getch();
             endwin();
             exit(0);
