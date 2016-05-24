@@ -20,7 +20,10 @@
     #error "Unrecognized compiler"
 #endif
 
+//List of objects
 enum {SP_Tree, SP_You, SP_Cave, SP_Stalag, SP_Pit, SP_Mob};
+
+//Object information, hp, mana, ATK/DEF, and location
 struct character
 {
     int hp_max;
@@ -38,6 +41,7 @@ void wait() //Do nothing. Needs fixing for combat.
 {
 }
 
+//Subtract ATK from HP, needs refining with DEF in the future
 void combat(struct character* attacker, struct character* defender)
 {
     attacker->hp_now-=defender->damage;
@@ -49,6 +53,7 @@ void combat(struct character* attacker, struct character* defender)
     }
 }
 
+//Put object to screen
 void draw(int x, int y, int type)
 {
     switch(type) 
@@ -78,7 +83,7 @@ void draw(int x, int y, int type)
 }
 
 
-//Redefine random int function, because terrain generation was finnicky
+//Redefine random int function, because terrain generation was wonky
 int randi(int ceiling)
 {
     int divisor=RAND_MAX/(ceiling+1);
@@ -90,7 +95,8 @@ int randi(int ceiling)
     return rand_int;
 }
 
-//Create trees randomly on terrain. Needs fixing.
+//Create trees randomly on terrain.
+//Will update in the future with more features
 void generate_terrain(int *list, struct winsize mods)
 {
     for(int i=0; i<OBJ_COUNT; i+=2)
@@ -100,7 +106,7 @@ void generate_terrain(int *list, struct winsize mods)
     }
 }
 
-//Draw every tree
+//Draw level obstacles, in color
 void render_terrain(int *list, int pallet)
 {
     //Pallet definitions
@@ -144,7 +150,7 @@ void render_stats(struct winsize size)
 
 
 /*
-Is the optimal algorithm for this A*, since values are going to be updating every turn?
+What is the optimal pathfinding algorithm for a moving start & endpoint?
 */
 void get_path()
 {
@@ -166,9 +172,9 @@ int main(int argc, char* argv[])
     curs_set(0);
     struct winsize size;
     ioctl(0, TIOCGWINSZ, &size);
-    int tree_list[OBJ_COUNT]; //Tree linked list, even numbers are x-coord, odds are y-coord
+    int tree_list[OBJ_COUNT]; //Obstacle storage, even numbers are x-coord, odds are y-coord
     keypad(stdscr, TRUE);
-    unsigned short input='\0'; //Store in int because KEY_values are large, apparently.
+    unsigned short input='\0'; //Store in short because KEY_values are large, apparently.
     char mode='\0'; //only supports 'e' for now.
     int cave_x;
     int cave_y;
@@ -251,6 +257,7 @@ int main(int argc, char* argv[])
                 wait();
                 break;
         }
+        //Check for PK, if you're dead, GAME OVER
         if(player.hp_now<=0)
         {
             clear();
@@ -269,7 +276,7 @@ int main(int argc, char* argv[])
         if(mode!='e')
         {
             clear();
-            //Check for collisions
+            //Is the player in the cave?
             if(player.y_loc==cave_y && player.x_loc==cave_x)
             {
                 player.x_loc=size.ws_col/2; //reset x
@@ -293,7 +300,7 @@ int main(int argc, char* argv[])
         {
             refresh();
         }
-        draw(player.x_loc, player.y_loc, SP_You);
+        draw(player.x_loc, player.y_loc, SP_You); //Put character to screen
     }
     endwin();
     return 0;
