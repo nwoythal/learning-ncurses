@@ -4,7 +4,7 @@ CC = gcc
 # -g for gdb
 # -lncurses to link ncurses
 # -Wall for all warnings
-CFLAGS = -g -lncurses -Wall -std=c99
+CFLAGS = -g -lncurses -Wall -std=c99 -Werror
 TARGET = control
 
 all: $(TARGET)
